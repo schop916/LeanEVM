@@ -1,0 +1,172 @@
+# LeanEVM
+
+A proof-of-concept framework for formal verification of Ethereum smart contracts using Lean 4.
+
+## Overview
+
+LeanEVM demonstrates how to apply theorem proving techniques to verify smart contract properties. Inspired by the [Veil framework](https://github.com/verse-lab/veil), it embeds the entire verification workflow within Lean 4.
+
+### Philosophy
+
+- **All goals are Lean goals** - No separate specification language
+- **All proofs are Lean proofs** - Full power of interactive theorem proving
+- **Seamless automation fallback** - When SMT fails, prove manually
+
+## Features
+
+### Core Types (`LeanEVM.Core.Types`)
+- `Address` - Ethereum addresses
+- `Storage` - Contract storage as functions
+- `Balances` - ETH balance tracking
+- Safe arithmetic with overflow checking
+
+### Execution Model (`LeanEVM.Core.Execution`)
+- `ExecResult` monad for success/revert/outOfGas
+- Reentrancy guard pattern
+- Two-state reasoning for transitions
+
+### ERC-20 Model (`LeanEVM.Contracts.ERC20`)
+- Full ERC-20 interface
+- Verified properties:
+  - Transfer conservation
+  - Balance correctness
+  - Zero-address safety
+  - Insufficient balance reverts
+  - Allowance correctness
+
+### Safety Properties (`LeanEVM.Properties.SafetyProperties`)
+- Access control patterns
+- Reentrancy safety proofs
+- Vault deposit/withdraw symmetry
+- Bounded value reasoning
+
+## Getting Started
+
+### Prerequisites
+- Lean 4 (v4.14.0)
+- Lake build system
+
+### Building
+
+```bash
+cd LeanEVM
+lake update
+lake build
+```
+
+### Example: Verify Transfer Conservation
+
+```lean
+import LeanEVM
+
+open LeanEVM.Contracts
+
+-- The theorem states: sender balance + receiver balance is unchanged
+#check transfer_conserves_local_balance
+
+-- Use it in a proof
+example (state state' : TokenState) (msg : MsgContext) (to_ : Address) (amount : Nat)
+    (h_neq : msg.sender ≠ to_)
+    (h_success : transfer state msg to_ amount = ExecResult.success state') :
+    state.balanceOf msg.sender + state.balanceOf to_ =
+    state'.balanceOf msg.sender + state'.balanceOf to_ :=
+  transfer_conserves_local_balance state state' msg to_ amount h_neq h_success
+```
+
+## Verified Properties
+
+### ERC-20 Token
+
+| Property | Theorem | Status |
+|----------|---------|--------|
+| Transfer conserves local balance | `transfer_conserves_local_balance` | ✓ Proved |
+| Transfer preserves total supply | `transfer_preserves_totalSupply` | ✓ Proved |
+| Sender balance decreases by amount | `transfer_decreases_sender` | ✓ Proved |
+| Receiver balance increases by amount | `transfer_increases_receiver` | ✓ Proved |
+| Transfer to zero reverts | `transfer_to_zero_reverts` | ✓ Proved |
+| Insufficient balance reverts | `transfer_insufficient_balance_reverts` | ✓ Proved |
+| Approve sets exact allowance | `approve_sets_allowance` | ✓ Proved |
+| TransferFrom decreases allowance | `transferFrom_decreases_allowance` | ✓ Proved |
+
+### Reentrancy Safety
+
+| Property | Theorem | Status |
+|----------|---------|--------|
+| Guarded functions reject reentrant calls | `guarded_is_reentrancy_safe` | ✓ Proved |
+| Role-restricted functions revert for non-members | `onlyRole_reverts_non_member` | ✓ Proved |
+
+### Vault Pattern
+
+| Property | Theorem | Status |
+|----------|---------|--------|
+| Deposit updates total correctly | `deposit_preserves_invariant_local` | ✓ Proved |
+| Withdraw updates total correctly | `withdraw_preserves_invariant_local` | ✓ Proved |
+
+## Architecture
+
+```
+LeanEVM/
+├── LeanEVM.lean              # Main library entry point
+├── LeanEVM/
+│   ├── Core/
+│   │   ├── Types.lean        # EVM primitive types
+│   │   └── Execution.lean    # Execution model
+│   ├── Contracts/
+│   │   └── ERC20.lean        # ERC-20 token model
+│   └── Properties/
+│       └── SafetyProperties.lean  # Property framework
+├── lakefile.lean             # Build configuration
+└── README.md
+```
+
+## Roadmap
+
+### Phase 1: Foundation (Current)
+- [x] Basic EVM types
+- [x] Execution monad
+- [x] ERC-20 model with proofs
+- [x] Reentrancy guard pattern
+
+### Phase 2: Extended Contracts
+- [ ] ERC-721 (NFT) model
+- [ ] Vault/Staking contracts
+- [ ] AMM (Uniswap-style) model
+
+### Phase 3: Automation
+- [ ] SMT integration for arithmetic
+- [ ] Custom decision procedures
+- [ ] Counterexample generation
+
+### Phase 4: Real-World
+- [ ] Solidity-to-Lean translator
+- [ ] Verification of deployed contracts
+- [ ] Integration with security contest workflow
+
+## Comparison with Other Tools
+
+| Feature | LeanEVM | Certora | Halmos | Kontrol |
+|---------|---------|---------|--------|---------|
+| Interactive proofs | ✓ | ✗ | ✗ | Limited |
+| Higher-order logic | ✓ | ✗ | ✗ | ✗ |
+| Open source | ✓ | ✗ | ✓ | ✓ |
+| SMT automation | Planned | ✓ | ✓ | ✓ |
+| Learning curve | High | Medium | Low | Medium |
+
+## Contributing
+
+This is a proof-of-concept. Contributions welcome for:
+- Additional contract models
+- More property theorems
+- Automation tactics
+- Documentation
+
+## References
+
+- [Veil: A Framework for Automated and Interactive Verification](https://github.com/verse-lab/veil)
+- [A Survey of Attacks on Ethereum Smart Contracts](https://eprint.iacr.org/2016/1007)
+- [OWASP Smart Contract Top 10](https://owasp.org/www-project-smart-contract-top-10/)
+- [KEVM: Complete Formal Semantics of the EVM](https://github.com/runtimeverification/evm-semantics)
+
+## License
+
+MIT
