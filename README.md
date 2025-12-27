@@ -44,6 +44,21 @@ LeanEVM demonstrates how to apply theorem proving techniques to verify smart con
   - Mint increases balance
   - Cannot approve self as operator
 
+### AMM Model (`LeanEVM.Contracts.AMM`)
+- Uniswap v2 style constant-product AMM
+- Features:
+  - Token pair liquidity pools
+  - LP token minting/burning
+  - Swap with 0.3% fee
+  - Minimum liquidity protection
+- Verified properties:
+  - Cannot initialize twice
+  - Cannot swap on empty pool
+  - Zero input swap reverts
+  - Insufficient LP tokens reverts
+  - Initialized pool has positive reserves
+  - Minimum liquidity locked to zero address
+
 ### Safety Properties (`LeanEVM.Properties.SafetyProperties`)
 - Access control patterns
 - Reentrancy safety proofs
@@ -117,6 +132,19 @@ example (state state' : TokenState) (msg : MsgContext) (to_ : Address) (amount :
 | Cannot approve self as operator | `setApprovalForAll_self_reverts` | ✓ Proved |
 | Mint increases balance | `mint_increases_balance` | ✓ Proved |
 
+### AMM (Automated Market Maker)
+
+| Property | Theorem | Status |
+|----------|---------|--------|
+| Cannot initialize twice | `initialize_twice_reverts` | ✓ Proved |
+| Cannot swap on empty pool | `swap_empty_reverts` | ✓ Proved |
+| Zero input swap reverts | `swap_zero_reverts` | ✓ Proved |
+| Insufficient LP tokens reverts | `remove_insufficient_reverts` | ✓ Proved |
+| Initialized pool has reserves | `initialized_has_reserves` | ✓ Proved |
+| Empty pool not initialized | `empty_not_initialized` | ✓ Proved |
+| getAmountOut fails on zero reserve | `getAmountOut_none_zero_reserve` | ✓ Proved |
+| Minimum liquidity locked | `init_locks_minimum_liquidity` | ✓ Proved |
+
 ### Vault Pattern
 
 | Property | Theorem | Status |
@@ -135,7 +163,8 @@ LeanEVM/
 │   │   └── Execution.lean    # Execution model
 │   ├── Contracts/
 │   │   ├── ERC20.lean        # ERC-20 token model
-│   │   └── ERC721.lean       # ERC-721 NFT model
+│   │   ├── ERC721.lean       # ERC-721 NFT model
+│   │   └── AMM.lean          # Automated Market Maker model
 │   └── Properties/
 │       └── SafetyProperties.lean  # Property framework
 ├── lakefile.lean             # Build configuration
@@ -149,12 +178,13 @@ LeanEVM/
 - [x] Execution monad
 - [x] ERC-20 model with proofs
 - [x] ERC-721 NFT model with proofs
+- [x] AMM (Uniswap v2 style) model with proofs
 - [x] Reentrancy guard pattern
 
 ### Phase 2: Extended Contracts
 - [ ] Vault/Staking contracts
-- [ ] AMM (Uniswap-style) model
 - [ ] ERC-1155 multi-token model
+- [ ] Lending protocol (Aave-style)
 
 ### Phase 3: Automation
 - [ ] SMT integration for arithmetic
