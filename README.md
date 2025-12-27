@@ -34,6 +34,16 @@ LeanEVM demonstrates how to apply theorem proving techniques to verify smart con
   - Insufficient balance reverts
   - Allowance correctness
 
+### ERC-721 NFT Model (`LeanEVM.Contracts.ERC721`)
+- Full ERC-721 interface (mint, burn, transfer, approve)
+- Verified properties:
+  - Mint to zero address reverts
+  - Cannot mint existing token
+  - Transfer to zero address reverts
+  - Transfer updates owner correctly
+  - Mint increases balance
+  - Cannot approve self as operator
+
 ### Safety Properties (`LeanEVM.Properties.SafetyProperties`)
 - Access control patterns
 - Reentrancy safety proofs
@@ -95,6 +105,18 @@ example (state state' : TokenState) (msg : MsgContext) (to_ : Address) (amount :
 | Guarded functions reject reentrant calls | `guarded_is_reentrancy_safe` | ✓ Proved |
 | Role-restricted functions revert for non-members | `onlyRole_reverts_non_member` | ✓ Proved |
 
+### ERC-721 NFT
+
+| Property | Theorem | Status |
+|----------|---------|--------|
+| Mint to zero address reverts | `mint_to_zero_reverts` | ✓ Proved |
+| Cannot mint existing token | `mint_existing_reverts` | ✓ Proved |
+| Transfer to zero reverts | `transferFrom_to_zero_reverts` | ✓ Proved |
+| Transfer invalid token reverts | `transferFrom_invalid_token_reverts` | ✓ Proved |
+| Transfer updates owner | `transferFrom_updates_owner` | ✓ Proved |
+| Cannot approve self as operator | `setApprovalForAll_self_reverts` | ✓ Proved |
+| Mint increases balance | `mint_increases_balance` | ✓ Proved |
+
 ### Vault Pattern
 
 | Property | Theorem | Status |
@@ -112,7 +134,8 @@ LeanEVM/
 │   │   ├── Types.lean        # EVM primitive types
 │   │   └── Execution.lean    # Execution model
 │   ├── Contracts/
-│   │   └── ERC20.lean        # ERC-20 token model
+│   │   ├── ERC20.lean        # ERC-20 token model
+│   │   └── ERC721.lean       # ERC-721 NFT model
 │   └── Properties/
 │       └── SafetyProperties.lean  # Property framework
 ├── lakefile.lean             # Build configuration
@@ -125,12 +148,13 @@ LeanEVM/
 - [x] Basic EVM types
 - [x] Execution monad
 - [x] ERC-20 model with proofs
+- [x] ERC-721 NFT model with proofs
 - [x] Reentrancy guard pattern
 
 ### Phase 2: Extended Contracts
-- [ ] ERC-721 (NFT) model
 - [ ] Vault/Staking contracts
 - [ ] AMM (Uniswap-style) model
+- [ ] ERC-1155 multi-token model
 
 ### Phase 3: Automation
 - [ ] SMT integration for arithmetic

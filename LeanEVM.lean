@@ -30,6 +30,7 @@ def myToken := TokenState.init ⟨1⟩ 1000
 - `LeanEVM.Core.Types`: Basic EVM types
 - `LeanEVM.Core.Execution`: Execution model
 - `LeanEVM.Contracts.ERC20`: ERC-20 token model
+- `LeanEVM.Contracts.ERC721`: ERC-721 NFT model
 - `LeanEVM.Properties.SafetyProperties`: Property framework
 -/
 
@@ -39,6 +40,7 @@ import LeanEVM.Core.Execution
 
 -- Contract models
 import LeanEVM.Contracts.ERC20
+import LeanEVM.Contracts.ERC721
 
 -- Property framework
 import LeanEVM.Properties.SafetyProperties
