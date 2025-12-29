@@ -1,0 +1,38 @@
+[package]
+name = "lean-evm-native"
+version = "0.1.0"
+edition = "2021"
+description = "Native FFI bindings for LeanEVM reference testing using revm"
+license = "MIT"
+
+[lib]
+name = "lean_evm_native"
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+# Reference EVM implementation
+revm = { version = "3.5", default-features = false, features = ["std", "serde"] }
+revm-primitives = "1.3"
+
+# Ethereum types
+alloy-primitives = "0.7"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# FFI helpers
+libc = "0.2"
+
+[build-dependencies]
+# Build script for Lean integration
+cc = "1.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
